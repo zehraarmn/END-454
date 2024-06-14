@@ -1,0 +1,206 @@
+import pandas as pd 
+import os 
+import glob 
+from openpyxl import load_workbook
+
+DATA_SHEET = 'Tuketim'
+CONSUME_THRESHOLD = 0.65 # %35 azalis degeri
+AVARAGE_KWH = 130 # 130 KWH ortalama
+path = os.getcwd()
+resultPath = os.getcwd()+'/Sonuc'
+csv_files = glob.glob(os.path.join(path, "*.xlsx"))
+
+#2 senelik ve 6 aylik karsilastirlamalarin yapilacagi fonksiyon
+def calculateExtra(data):
+    total = data.iloc[0:24].sum()
+    lastHalf = data.iloc[18:24].sum()
+
+    # 0 harcama olan kayitlari silerek ortalama hesaplanir
+    # 24 aylik 
+    data_no_zeros = data[data != 0]
+    average_no_zeros = data_no_zeros.mean()
+
+    # Son 6 ay sıfır olmayan
+    last_half = data.iloc[18:24]
+    last_half_no_zeros = last_half[last_half != 0]
+    last_half_avarage_no_zeros = last_half_no_zeros.mean()
+    
+    result = pd.DataFrame({
+        '2 Sene Ortalama': [int(total/24 < AVARAGE_KWH)],
+        '2 Sene Ortalama (Aktif Kullanimlar)' : [int(len(data_no_zeros) != 0 and average_no_zeros/len(data_no_zeros) < AVARAGE_KWH)],
+        '6 Ay Ortalama': [int(lastHalf/6 < AVARAGE_KWH)],
+        '6 Ay Ortalama (Aktif Kullanimlar)': [int(len(last_half_no_zeros) != 0 and last_half_avarage_no_zeros/len(last_half_no_zeros) < AVARAGE_KWH)]
+    })
+
+    return result
+
+    
+
+#Aylik karsilastirmalarin yapilacagi fonksiyon
+def calculateMonthly(data): 
+
+    #2022 aylik veriler
+    jan2022 = data.iloc[0]
+    feb2022 = data.iloc[1]
+    mar2022 = data.iloc[2]
+    apr2022 = data.iloc[3]
+    may2022 = data.iloc[4]
+    jun2022 = data.iloc[5]
+    jul2022 = data.iloc[6]
+    aug2022 = data.iloc[7]
+    sep2022 = data.iloc[8]
+    oct2022 = data.iloc[9]
+    nov2022 = data.iloc[10]
+    dec2022 = data.iloc[11]
+
+    #2023 aylik veriler
+    jan2023 = data.iloc[12]
+    feb2023 = data.iloc[13]
+    mar2023 = data.iloc[14]
+    apr2023 = data.iloc[15]
+    may2023 = data.iloc[16]
+    jun2023 = data.iloc[17]
+    jul2023 = data.iloc[18]
+    aug2023 = data.iloc[19]
+    sep2023 = data.iloc[20]
+    oct2023 = data.iloc[21]
+    nov2023 = data.iloc[22]
+    dec2023 = data.iloc[23]
+
+    # Sifira bolme hatasi almamak icin != 0 kontrolu yapiliyor
+    monthlyResult = pd.DataFrame({
+        '22 Subat/22 Ocak': [int(jan2022 != 0 and feb2022/jan2022 < CONSUME_THRESHOLD)],
+        '22 Mart/22 Subat': [int(feb2022 != 0 and mar2022/feb2022 < CONSUME_THRESHOLD)],
+        '22 Nisan/22 Mart': [int(mar2022 != 0 and apr2022/mar2022 < CONSUME_THRESHOLD)],
+        '22 Mayis/22 Nisan': [int(apr2022 != 0 and may2022/apr2022 < CONSUME_THRESHOLD)],
+        '22 Haziran/22 Mayis': [int(may2022 != 0 and jun2022/may2022 < CONSUME_THRESHOLD)],
+        '22 Temmuz/22 Haziran': [int(jun2022 != 0 and jul2022/jun2022 < CONSUME_THRESHOLD)],
+        '22 Agustos/22 Temmuz': [int(jul2022 != 0 and aug2022/jul2022 < CONSUME_THRESHOLD)],
+        '22 Eylul/22 Agustos': [int(aug2022 != 0 and sep2022/aug2022 < CONSUME_THRESHOLD)],
+        '22 Ekim/22 Eylul': [int(sep2022 != 0 and oct2022/sep2022 < CONSUME_THRESHOLD)],
+        '22 Kasim/22 Ekim': [int(oct2022 != 0 and nov2022/oct2022 < CONSUME_THRESHOLD)],
+        '22 Aralik/22 Kasim': [int(nov2022 != 0 and dec2022/nov2022 < CONSUME_THRESHOLD)],
+        '23 Ocak/22 Aralik': [int(dec2022 != 0 and jan2023/dec2022 < CONSUME_THRESHOLD)],
+        '23 Subat/23 Ocak': [int(jan2023 != 0 and feb2023/jan2023 < CONSUME_THRESHOLD)],
+        '23 Mart/23 Subat': [int(feb2023 != 0 and mar2023/feb2023 < CONSUME_THRESHOLD)],
+        '23 Nisan/23 Mart': [int(mar2023 != 0 and apr2023/mar2023 < CONSUME_THRESHOLD)],
+        '23 Mayis/23 Nisan': [int(apr2023 != 0 and may2023/apr2023 < CONSUME_THRESHOLD)],
+        '23 Haziran/23 Mayis': [int(may2023 != 0 and jun2023/may2023 < CONSUME_THRESHOLD)],
+        '23 Temmuz/23 Haziran': [int(jun2023 != 0 and jul2023/jun2023 < CONSUME_THRESHOLD)],
+        '23 Agustos/23 Temmuz': [int(jul2023 != 0 and aug2023/jul2023 < CONSUME_THRESHOLD)],
+        '23 Eylul/23 Agustos': [int(aug2023 != 0 and sep2023/aug2023 < CONSUME_THRESHOLD)],
+        '23 Ekim/23 Eylul': [int(sep2023 != 0 and oct2023/sep2023 < CONSUME_THRESHOLD)],
+        '23 Kasim/23 Ekim': [int(oct2023 != 0 and nov2023/oct2023 < CONSUME_THRESHOLD)],
+        '23 Aralik/23 Kasim': [int(nov2023 != 0 and dec2023/nov2023 < CONSUME_THRESHOLD)],
+        'Ocak 23/22': [int(jan2022 != 0 and jan2023/jan2022 < CONSUME_THRESHOLD)],
+        'Subat 23/22': [int(feb2022 != 0 and feb2023/feb2022 < CONSUME_THRESHOLD)],
+        'Mart 23/22': [int(mar2022 != 0 and mar2023/mar2022 < CONSUME_THRESHOLD)],
+        'Nisan 23/22': [int(apr2022 != 0 and apr2023/apr2022 < CONSUME_THRESHOLD)],
+        'Mayis 23/22': [int(may2022 != 0 and may2023/may2022 < CONSUME_THRESHOLD)],
+        'Haziran 23/22': [int(jun2022 != 0 and jun2023/jun2022 < CONSUME_THRESHOLD)],
+        'Temmuz 23/22': [int(jul2022 != 0 and jul2023/jul2022 < CONSUME_THRESHOLD)],
+        'Agustos 23/22': [int(aug2022 != 0 and aug2023/aug2022 < CONSUME_THRESHOLD)],
+        'Eylul 23/22': [int(sep2022 != 0 and sep2023/sep2022 < CONSUME_THRESHOLD)],
+        'Ekim 23/22': [int(oct2022 != 0 and oct2023/oct2022 < CONSUME_THRESHOLD)],
+        'Kasim 23/22': [int(nov2022 != 0 and nov2023/nov2022 < CONSUME_THRESHOLD)],
+        'Aralik 23/22': [int(dec2022 != 0 and dec2023/dec2022 < CONSUME_THRESHOLD)],
+    })
+
+    return monthlyResult
+
+
+#Ceyrek/yari yil/yil karsilastirmalarinin yapilacagi fonksiyon
+def calculateSeasonal(data):
+    
+    #2022 ceyrek/yari yil/yil toplamlari
+    firstQuarter2022 = data.iloc[0:3].sum()
+    secondQuarter2022 = data.iloc[3:6].sum()
+    firstHalf2022 = data.iloc[0:6].sum()
+    thirdQuarter2022 = data.iloc[6:9].sum()
+    fourthQuarter2022 = data.iloc[9:12].sum()
+    secondHalf2022 = data.iloc[6:12].sum()
+    year2022 = data.iloc[0:12].sum()
+
+    #2023 ceyrek/yari yil/yil toplamlari
+    firstQuarter2023 = data.iloc[12:15].sum()
+    secondQuarter2023 = data.iloc[15:18].sum()
+    firstHalf2023 = data.iloc[12:18].sum()
+    thirdQuarter2023 = data.iloc[18:21].sum()
+    fourthQuarter2023 = data.iloc[21:24].sum()
+    secondHalf2023 = data.iloc[18:24].sum()
+    year2023 = data.iloc[12:24].sum()
+
+    # Sifira bolme hatasi almamak icin != 0 kontrolu yapiliyor
+    result = pd.DataFrame({
+        '1. Ceyrek': [int(firstQuarter2022 != 0 and firstQuarter2023/firstQuarter2022 < CONSUME_THRESHOLD)],
+        '2. Ceyrek': [int(secondQuarter2022 != 0 and secondQuarter2023/secondQuarter2022 < CONSUME_THRESHOLD)],
+        '3. Ceyrek': [int(thirdQuarter2022 != 0 and thirdQuarter2023/thirdQuarter2022 < CONSUME_THRESHOLD)],
+        '4. Ceyrek': [int(fourthQuarter2022 != 0 and fourthQuarter2023/fourthQuarter2022 < CONSUME_THRESHOLD)],
+        '1. Yarim Yil': [int(firstHalf2022 != 0 and firstHalf2023/firstHalf2022 < CONSUME_THRESHOLD)],
+        '2. Yarim Yil': [int(secondHalf2022 != 0 and secondHalf2023/secondHalf2022 < CONSUME_THRESHOLD)],
+        'Yillik': [int(year2022 != 0 and year2023/year2022 < CONSUME_THRESHOLD)]
+    })
+
+    return result
+
+
+#Hesaplamalarin yapilacagi fonksiyon
+def calculate(data):
+    result = pd.DataFrame({})
+    for index, row in data.iterrows():
+        # 0. kolondaki tesisat numarasi kaydedildi
+        rowResult = pd.DataFrame({
+            'Tesisat No': [row.iloc[0]]
+        })
+        
+        # 2022 ve 2023 verileri icin ilk 24 kolon (1-25 arasi) kullanildi
+        monthly_data = row.iloc[1:25]
+
+        #Ceyreklik karsilastirmalar
+        quarterResult = calculateSeasonal(monthly_data)
+        quarterResult["qtoplam"]=quarterResult.sum(axis=1)*0.25
+        #Aylik karsilastirmalar
+        monthlyResult = calculateMonthly(monthly_data)
+        monthlyResult["mtoplam"]=monthlyResult.sum(axis=1)*1/12
+        #2 Senelik ve 6 aylik karsilastirmalar
+        extraResult = calculateExtra(monthly_data)
+        extraResult["etoplam"]=extraResult.sum(axis=1)*0.5
+           
+        rowResult = rowResult.join(quarterResult)
+        rowResult = rowResult.join(monthlyResult)
+        rowResult = rowResult.join(extraResult)
+
+        # Her tesisat no icin toplam saglanan kistas sayisi
+        # total = pd.DataFrame({
+        #     'Total': [rowResult.iloc[0,1:].sum()]
+        # })
+
+        # rowResult = rowResult.join(total)
+        result = pd.concat([result, rowResult], axis=0)
+    
+    result["Total"]=result[["qtoplam","mtoplam","etoplam"]].sum(axis=1)
+    result.drop(columns=["qtoplam","mtoplam","etoplam"],inplace=True)
+    #Sonucu siraliyoruz
+    sorted_result = result.sort_values(by='Total', ascending=False)
+
+    return sorted_result
+
+
+# Klasor icindeki butun excel dosyalarini okur ve hesaplar
+for file in csv_files:
+    wb = load_workbook(file, read_only=True)
+    if DATA_SHEET in wb.sheetnames:
+        df = pd.read_excel(file,DATA_SHEET)
+        # Bos olan hucreler 0 ile dolduruldu
+        df_filled = df.fillna(0)
+        result = calculate(df_filled)
+        #Sonuc excelinin koyulacagi klasor yaratiliyor
+        os.makedirs(resultPath, exist_ok=True)
+        #Dosya olusturuluyor ve hesaplama icine yaziliyor
+        excel_file_name = f'Sonuc_{os.path.splitext(os.path.basename(file))[0]}.xlsx'
+        excel_file_path = os.path.join(resultPath, excel_file_name)
+
+        with pd.ExcelWriter(excel_file_path) as writer:
+            pd.DataFrame(result).to_excel(writer, index=False)
+    else:
+        print("Uyari!!! ", file, " exceli 'Tuketim' sayfasina sahip olmadigi icin okunamadi!\n")

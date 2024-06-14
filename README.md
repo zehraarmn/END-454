@@ -1,2 +1,7 @@
 # END-454
 PYTHON İLE BOOLEAN METODU VE SIRALAMA ALGORITMASI KULLANILARAK KAÇAK ELEKTRIK TAHMINLEME
+
+
+pip3 install pandas
+pip3 install glob2
+pip3 install openpyxl
